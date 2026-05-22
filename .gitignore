@@ -1,0 +1,5 @@
+chave api operouter.txt
+.gemini/
+*.local
+node_modules/
+dist/

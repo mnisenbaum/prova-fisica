@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FísicaGen - Gerador de Provas de Física (BNCC)</title>
+    <!-- Importação de Fontes Premium do Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Principal -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <h1 class="logo-title">FísicaGen</h1>
+                <p class="logo-subtitle">Gerador de Avaliações de Física Alinhadas à BNCC</p>
+            </div>
+            <button id="btnConfigAPI" class="btn-secondary" title="Configurar API Key do OpenRouter">
+                <span>🔑 Configurar API</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- Painel de Configurações Lateral/Superior -->
+        <section class="config-panel">
+            <h2 class="section-title">⚙️ Parâmetros da Questão</h2>
+            <div class="config-grid">
+                <!-- Campo A: Ano Escolar -->
+                <div class="form-group">
+                    <label for="selectAno">Ano Escolar</label>
+                    <select id="selectAno">
+                        <option value="" disabled selected>Selecione o ano escolar</option>
+                        <option value="9ef">9º Ano Ensino Fundamental</option>
+                        <option value="1em">1º Ano Ensino Médio</option>
+                        <option value="2em">2º Ano Ensino Médio</option>
+                        <option value="3em">3º Ano Ensino Médio</option>
+                    </select>
+                </div>
+
+                <!-- Campo B: Assunto (Carregado dinamicamente via JS) -->
+                <div class="form-group">
+                    <label for="selectAssunto">Assunto (BNCC)</label>
+                    <select id="selectAssunto" disabled>
+                        <option value="" selected>Selecione um ano primeiro...</option>
+                    </select>
+                </div>
+
+                <!-- Campo C: Tipo de Questão -->
+                <div class="form-group">
+                    <label for="tipoQuestao">Tipo de Questão</label>
+                    <select id="tipoQuestao">
+                        <option value="multipla" selected>Múltipla Escolha</option>
+                        <option value="discursiva">Discursiva</option>
+                    </select>
+                </div>
+
+                <!-- Novo Campo: Estilo da Questão -->
+                <div class="form-group">
+                    <label for="selectEstilo">Estilo da Questão</label>
+                    <select id="selectEstilo">
+                        <option value="direta" selected>Direta (Sem Contexto)</option>
+                        <option value="contextualizada">Contextualizada</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Caixa de Texto Principal: Instruções Gerais -->
+            <div class="form-group textarea-group">
+                <label for="instrucoesAdicionais">Instruções Gerais (Opcional)</label>
+                <textarea id="instrucoesAdicionais" rows="2" placeholder="Ex: Peça para calcular a pressão, use unidades do SI... (Opcional)"></textarea>
+            </div>
+
+            <!-- Caixa de Texto Específica: Cenário/Contexto da História -->
+            <div id="containerContexto" class="form-group textarea-group" style="display: none;">
+                <label for="caixaContexto">Cenário / Contexto da História</label>
+                <textarea id="caixaContexto" rows="3" placeholder="Ex: Descreva a história de um skatista que desce uma rampa, ou um astronauta na Lua..."></textarea>
+            </div>
+
+            <!-- Botão Principal de Ação e Contador de Custo -->
+            <div class="action-footer">
+                <button id="btnGerar" class="btn-primary" disabled>
+                    <span id="btnGerarText">🚀 Gerar e Adicionar Questão</span>
+                    <div id="btnSpinner" class="spinner hidden"></div>
+                </button>
+                <div id="contadorCusto" class="contador-custo"></div>
+            </div>
+        </section>
+
+        <!-- Barra de Ações Globais da Prova -->
+        <section class="prova-actions-bar">
+            <button id="btnImprimir" class="btn-action" title="Imprimir prova ou salvar em PDF">
+                <span>🖨️ Imprimir Prova</span>
+            </button>
+            <button id="btnToggleGabarito" class="btn-action" title="Alternar visibilidade das respostas e gabarito detalhado">
+                <span>👁️ Ocultar/Exibir Gabaritos</span>
+            </button>
+            <button id="btnLimpar" class="btn-action btn-danger" title="Apagar todas as questões geradas">
+                <span>🗑️ Limpar Prova</span>
+            </button>
+        </section>
+
+        <!-- Área de Visualização e Edição da Prova -->
+        <article class="prova-folha">
+            <!-- Cabeçalho Acadêmico Estilizado (Editável pelo Professor) -->
+            <header class="prova-header">
+                <div class="prova-header-row">
+                    <input type="text" class="input-editable school-name" placeholder="NOME DA INSTITUIÇÃO DE ENSINO" value="Escola Estadual de Ensino Médio Dr. FísicaGen">
+                </div>
+                <div class="prova-header-row fields">
+                    <div class="field-item flex-3">
+                        <span class="label-printed">Aluno(a):</span>
+                        <input type="text" class="input-editable student-name" placeholder="Nome completo do estudante" value="">
+                    </div>
+                    <div class="field-item flex-1">
+                        <span class="label-printed">Data:</span>
+                        <input type="text" class="input-editable exam-date" placeholder="___/___/______" value="">
+                    </div>
+                </div>
+                <div class="prova-header-row fields">
+                    <div class="field-item flex-2">
+                        <span class="label-printed">Professor(a):</span>
+                        <input type="text" class="input-editable teacher-name" placeholder="Nome do Professor" value="Prof. Antigravity">
+                    </div>
+                    <div class="field-item flex-1">
+                        <span class="label-printed">Série/Turma:</span>
+                        <input type="text" class="input-editable class-name" placeholder="Ex: 1º Ano A" value="">
+                    </div>
+                    <div class="field-item flex-1">
+                        <span class="label-printed">Nota:</span>
+                        <span class="line-fill">___________</span>
+                    </div>
+                </div>
+                <div class="prova-title-container">
+                    <input type="text" class="input-editable exam-title" placeholder="TÍTULO DA AVALIAÇÃO" value="AVALIAÇÃO DE FÍSICA">
+                </div>
+            </header>
+
+            <!-- Conteúdo Principal da Prova (Questões) -->
+            <div id="provaContainer">
+                <div class="mensagem-vazia" id="emptyMessage">
+                    <div class="empty-icon">📝</div>
+                    <h3>Sua prova está vazia!</h3>
+                    <p>Defina as opções no painel superior e clique em <strong>"Gerar e Adicionar Questão"</strong> para iniciar.</p>
+                    <p class="empty-hint">Lembre-se de configurar sua chave de API antes do primeiro uso.</p>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <!-- Modal de Segurança (Configuração da API Key) -->
+    <div id="modalAPI" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>🔑 Configuração de Chave API</h3>
+                <button id="btnCloseModal" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>O <strong>FísicaGen</strong> utiliza a infraestrutura do <strong>OpenRouter</strong> para conectar com modelos de inteligência artificial avançados.</p>
+                <div class="info-alert">
+                    <strong>Como obter uma chave?</strong>
+                    <ol>
+                        <li>Crie uma conta gratuita em <a href="https://openrouter.ai/" target="_blank" rel="noopener">openrouter.ai</a>.</li>
+                        <li>Vá nas configurações e gere uma nova <strong>API Key</strong>.</li>
+                        <li>Cole a chave no campo abaixo para habilitar a geração de questões.</li>
+                    </ol>
+                </div>
+                <div class="form-group">
+                    <label for="inputAPIKey">OpenRouter API Key:</label>
+                    <input type="password" id="inputAPIKey" placeholder="sk-or-v1-..." autocomplete="off">
+                </div>
+                <p class="security-note">🔒 <strong>Segurança:</strong> Sua chave de API é gravada apenas no navegador local (localStorage). Ela nunca é enviada para nenhum servidor externo além do próprio endpoint oficial do OpenRouter.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelarAPI" class="btn-secondary">Cancelar</button>
+                <button id="btnSalvarAPI" class="btn-primary">Salvar Chave</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de Lógica Principal -->
+    <script src="app.js"></script>
+</body>
+</html>

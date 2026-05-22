@@ -1,0 +1,950 @@
+/* ==========================================================================
+   FísicaGen - Sistema de Design Acadêmico Premium
+   ========================================================================== */
+
+/* 1. Variáveis Globais de Design (Design Tokens) */
+:root {
+    --bg-page: #fcfbf7;            /* Creme/Marfim clássico acadêmico */
+    --bg-card: #ffffff;            /* Branco puro para o papel de prova */
+    --color-primary: #2c3e50;      /* Azul-escuro profissional */
+    --color-primary-light: #34495e;
+    --color-accent: #d35400;       /* Terracota clássico escolar */
+    --color-accent-light: #e67e22;
+    --color-text: #2c3e50;         /* Texto principal em azul escuro para melhor legibilidade */
+    --color-text-muted: #7f8c8d;   /* Cinza para notas e explicações */
+    --color-border: #dcdde1;       /* Bordas sutis */
+    --color-border-print: #2c3e50; /* Bordas de impressão mais escuras */
+    --bg-gabarito: #faf0e6;        /* Fundo suave para bloco de resposta */
+    --shadow-sm: 0 2px 8px rgba(44, 62, 80, 0.05);
+    --shadow-md: 0 8px 24px rgba(44, 62, 80, 0.08);
+    --shadow-lg: 0 16px 48px rgba(44, 62, 80, 0.12);
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-academic: 'Playfair Display', Georgia, serif;
+}
+
+/* 2. Reset e Configurações Globais */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-page);
+    color: var(--color-text);
+    font-family: var(--font-ui);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--color-accent-light);
+    text-decoration: underline;
+}
+
+/* 3. Estrutura de Layout */
+.app-header {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1.25rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-title {
+    font-family: var(--font-academic);
+    font-size: 2.25rem;
+    color: var(--color-primary);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.logo-subtitle {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-weight: 400;
+}
+
+.app-container {
+    max-width: 900px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* 4. Painel de Configurações */
+.config-panel {
+    background-color: var(--bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+}
+
+.config-panel:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(211, 84, 0, 0.15);
+}
+
+.section-title {
+    font-family: var(--font-academic);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-primary);
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group select, 
+.form-group input,
+.form-group textarea {
+    font-family: var(--font-ui);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: #fafbfc;
+    color: var(--color-primary);
+    outline: none;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.form-group textarea {
+    resize: vertical;
+    cursor: text;
+    min-height: 80px;
+}
+
+.form-group select:focus, 
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--color-accent);
+    background-color: var(--bg-card);
+    box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.1);
+}
+
+.form-group select:disabled {
+    background-color: #f1f2f6;
+    color: #a4b0be;
+    cursor: not-allowed;
+}
+
+.textarea-group {
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.action-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.contador-custo {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    text-align: center;
+    transition: var(--transition);
+    opacity: 0;
+}
+
+.contador-custo.visible {
+    opacity: 1;
+}
+
+/* 5. Botões Customizados */
+.btn-primary {
+    background-color: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    transition: var(--transition);
+    box-shadow: 0 4px 6px rgba(211, 84, 0, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--color-accent-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(211, 84, 0, 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    background-color: #cbd5e1;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(44, 62, 80, 0.05);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+/* Barra de Ações Globais da Prova */
+.prova-actions-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    background-color: var(--bg-card);
+    border: 1px solid var(--color-border);
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-action:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-action.btn-danger:hover {
+    background-color: #fff5f5;
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+/* Spinner de Carregamento */
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* 6. A Folha de Prova Acadêmica (A4 simulado em tela) */
+.prova-folha {
+    background-color: var(--bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 3rem;
+    box-shadow: var(--shadow-lg);
+    min-height: 800px;
+    position: relative;
+}
+
+/* Cabeçalho da Prova */
+.prova-header {
+    border: 2px solid var(--color-primary);
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    background-color: #fafbfc;
+}
+
+.prova-header-row {
+    display: flex;
+    width: 100%;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.prova-header-row.fields {
+    border-top: 1px dashed var(--color-border);
+    padding-top: 0.85rem;
+}
+
+.field-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+.flex-3 { flex: 3; }
+
+.label-printed {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-primary);
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.input-editable {
+    font-family: var(--font-ui);
+    border: none;
+    border-bottom: 1px solid transparent;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.95rem;
+    width: 100%;
+    outline: none;
+    color: #2c3e50;
+    background-color: transparent;
+    transition: var(--transition);
+}
+
+.input-editable:hover,
+.input-editable:focus {
+    background-color: rgba(44, 62, 80, 0.04);
+    border-bottom: 1px solid var(--color-accent);
+}
+
+.input-editable.school-name {
+    font-family: var(--font-academic);
+    font-weight: 700;
+    font-size: 1.35rem;
+    text-align: center;
+    color: var(--color-primary);
+}
+
+.input-editable.exam-title {
+    font-family: var(--font-academic);
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-top: 0.5rem;
+    color: var(--color-accent);
+}
+
+.prova-title-container {
+    border-top: 2px solid var(--color-primary);
+    padding-top: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.line-fill {
+    color: var(--color-border);
+    font-weight: 300;
+}
+
+/* Mensagem de Prova Vazia */
+.mensagem-vazia {
+    text-align: center;
+    padding: 6rem 2rem;
+    color: var(--color-text-muted);
+}
+
+.empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    filter: grayscale(0.2);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.mensagem-vazia h3 {
+    font-family: var(--font-academic);
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+}
+
+.mensagem-vazia p {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-hint {
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 1.5rem;
+}
+
+/* 7. Design das Questões */
+.questao-card {
+    position: relative;
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--color-border);
+    transition: var(--transition);
+}
+
+.questao-card:last-child {
+    border-bottom: none;
+}
+
+.questao-card:hover .btn-delete-questao {
+    opacity: 1;
+}
+
+.questao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.questao-numero {
+    font-family: var(--font-academic);
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--color-primary);
+    white-space: nowrap;
+}
+
+.questao-enunciado {
+    font-size: 1.05rem;
+    text-align: justify;
+    color: var(--color-primary);
+    width: 100%;
+}
+
+.btn-delete-questao {
+    position: absolute;
+    top: 2rem;
+    right: 0;
+    background-color: transparent;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: var(--transition);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+}
+
+.btn-delete-questao:hover {
+    background-color: #fff5f5;
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Opções de Múltipla Escolha */
+.questao-opcoes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-left: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.opcao-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 1rem;
+}
+
+.opcao-letra {
+    font-weight: 700;
+    color: var(--color-primary);
+    background-color: #fafbfc;
+    border: 1px solid var(--color-border);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+
+.opcao-texto {
+    padding-top: 1px;
+    text-align: justify;
+}
+
+/* Espaço para Resposta Discursiva */
+.questao-espaco-discursivo {
+    margin-left: 2.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    height: 180px;
+    position: relative;
+    background-color: #fafbfc;
+}
+
+.questao-espaco-discursivo::before {
+    content: "Espaço para resposta e cálculos";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    pointer-events: none;
+}
+
+/* Tags de Metadados (Ano/Assunto) */
+.questao-meta {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: 2.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.tag-meta {
+    font-size: 0.75rem;
+    background-color: #f1f2f6;
+    color: var(--color-primary-light);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* 8. Bloco de Gabarito e Resposta Detalhada (Colapsável) */
+.questao-gabarito {
+    margin-left: 2.5rem;
+    margin-top: 1.25rem;
+    background-color: var(--bg-gabarito);
+    border-left: 4px solid var(--color-accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 1.25rem 1.5rem;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+
+.gabarito-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--color-accent);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.gabarito-resposta-correta {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.gabarito-letra-destaque {
+    display: inline-block;
+    background-color: var(--color-accent);
+    color: white;
+    font-weight: 700;
+    padding: 0.1rem 0.5rem;
+    border-radius: var(--radius-sm);
+    margin-left: 0.25rem;
+}
+
+.gabarito-explicacao {
+    font-size: 0.95rem;
+    text-align: justify;
+    color: #4a5568;
+    border-top: 1px solid rgba(211, 84, 0, 0.15);
+    padding-top: 0.75rem;
+}
+
+/* Ocultação dinâmica dos gabaritos */
+.prova-folha.hide-gabaritos .questao-gabarito {
+    display: none !important;
+}
+
+/* 9. Modal de Segurança (Overlay e Caixa) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(44, 62, 80, 0.45);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    transition: var(--transition);
+}
+
+.modal-box {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-md);
+    width: 90%;
+    max-width: 550px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    animation: modalSlideIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-family: var(--font-academic);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.75rem;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.7;
+    transition: var(--transition);
+}
+
+.btn-close:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-body p {
+    font-size: 0.95rem;
+    color: var(--color-primary-light);
+}
+
+.info-alert {
+    background-color: rgba(211, 84, 0, 0.06);
+    border-left: 4px solid var(--color-accent);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.info-alert strong {
+    color: var(--color-accent);
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.info-alert ol {
+    margin-left: 1.2rem;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.security-note {
+    font-size: 0.8rem !important;
+    color: var(--color-text-muted) !important;
+    background-color: #fafbfc;
+    padding: 0.75rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.modal-footer {
+    background-color: #fafbfc;
+    border-top: 1px solid var(--color-border);
+    padding: 1rem 1.75rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .app-header {
+        padding: 1rem;
+    }
+    
+    .header-container {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .app-container {
+        margin: 1rem auto;
+        padding: 0 1rem;
+        gap: 1.5rem;
+    }
+    
+    .config-panel {
+        padding: 1.25rem;
+    }
+    
+    .prova-folha {
+        padding: 1.5rem;
+    }
+    
+    .prova-header {
+        padding: 1rem;
+    }
+    
+    .prova-header-row {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .field-item {
+        width: 100%;
+    }
+    
+    .questao-opcoes {
+        margin-left: 0;
+    }
+    
+    .questao-espaco-discursivo {
+        margin-left: 0;
+    }
+    
+    .questao-gabarito {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    
+    .questao-meta {
+        margin-left: 0;
+    }
+}
+
+/* ==========================================================================
+   10. Folha de Estilos de Impressão Escolar Oficial (@media print)
+   ========================================================================== */
+@media print {
+    /* Forçar fundo branco absoluto nas páginas impressas */
+    html, body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-family: var(--font-ui);
+    }
+
+    /* Ocultar elementos desnecessários para a prova impressa */
+    .app-header,
+    .config-panel,
+    .prova-actions-bar,
+    .modal-overlay,
+    .btn-delete-questao,
+    .empty-hint,
+    .questao-meta {
+        display: none !important;
+    }
+
+    /* Formatar a folha como documento de impressão A4 */
+    .app-container {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    .prova-folha {
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        min-height: auto !important;
+        background-color: #ffffff !important;
+    }
+
+    /* Reforçar bordas do cabeçalho oficial para ficarem nítidas em preto e branco */
+    .prova-header {
+        border: 2px solid #000000 !important;
+        background-color: #ffffff !important;
+        padding: 1rem !important;
+        margin-bottom: 2rem !important;
+    }
+
+    .prova-header-row.fields {
+        border-top: 1px solid #000000 !important;
+    }
+
+    .input-editable {
+        border-bottom: none !important;
+        padding: 0 !important;
+        color: #000000 !important;
+    }
+
+    .input-editable::placeholder {
+        color: transparent !important;
+    }
+
+    .line-fill {
+        color: #000000 !important;
+    }
+
+    /* Ajustar estilo das questões para papel */
+    .questao-card {
+        page-break-inside: avoid; /* Impede que uma questão seja cortada ao meio */
+        border-bottom: 1px solid #000000 !important;
+        padding: 1.5rem 0 !important;
+    }
+
+    .questao-numero {
+        color: #000000 !important;
+    }
+
+    .questao-enunciado {
+        color: #000000 !important;
+    }
+
+    .opcao-letra {
+        background-color: #ffffff !important;
+        border: 1px solid #000000 !important;
+        color: #000000 !important;
+    }
+
+    .questao-espaco-discursivo {
+        border: 1px solid #000000 !important;
+        background-color: #ffffff !important;
+    }
+
+    .questao-espaco-discursivo::before {
+        display: none !important;
+    }
+
+    /* Regra de Ocultação/Exibição de Gabarito na Impressão */
+    .questao-gabarito {
+        page-break-inside: avoid;
+        background-color: #f9f9f9 !important;
+        border-left: 4px solid #000000 !important;
+        border-top: 1px solid #000000 !important;
+        border-right: 1px solid #000000 !important;
+        border-bottom: 1px solid #000000 !important;
+        color: #000000 !important;
+        margin-top: 1rem !important;
+    }
+
+    .gabarito-header {
+        color: #000000 !important;
+        border-bottom: 1px solid #000000 !important;
+        padding-bottom: 0.25rem !important;
+    }
+
+    .gabarito-letra-destaque {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        border: 1px solid #000000 !important;
+    }
+
+    .gabarito-explicacao {
+        color: #000000 !important;
+        border-top: 1px dashed #000000 !important;
+    }
+
+    /* Ocultação forçada se a classe hide-gabaritos estiver ativa */
+    .prova-folha.hide-gabaritos .questao-gabarito {
+        display: none !important;
+    }
+}
