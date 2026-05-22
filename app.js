@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const selectAssunto = document.getElementById("selectAssunto");
     const selectTipo = document.getElementById("tipoQuestao");
     const selectEstilo = document.getElementById("selectEstilo");
+    const selectDificuldade = document.getElementById("nivelDificuldade");
     const instrucoesAdicionais = document.getElementById("instrucoesAdicionais");
     const caixaContexto = document.getElementById("caixaContexto");
     const containerContexto = document.getElementById("containerContexto");
@@ -162,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Controle dinâmico da exibição da caixa de cenário/contexto
     selectEstilo.addEventListener("change", () => {
         if (selectEstilo.value === "contextualizada") {
-            containerContexto.style.display = "block";
+            containerContexto.style.display = "flex";
             caixaContexto.focus();
         } else {
             containerContexto.style.display = "none";
@@ -183,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 6. Integração com a API do OpenRouter
-    async function gerarQuestaoIA(ano, assunto, tipo, estilo, instrucoes, contexto) {
+    async function gerarQuestaoIA(ano, assunto, tipo, estilo, dificuldade, instrucoes, contexto) {
         const key = obterAPIKey();
         if (!key) {
             alert("Por favor, configure sua chave de API antes de gerar.");
@@ -217,9 +218,19 @@ Se o tipo de questão for discursiva, você DEVE estruturar o JSON da seguinte f
 - No campo "resposta_correta", forneça uma descrição curta da resposta esperada (o padrão de resposta exato para pontuação máxima).
 - No campo "gabarito_detalhado", elabore a explicação passo a passo dos cálculos e conceitos físicos necessários para a solução completa, além de critérios de correção sugeridos.`;
 
+        let promptDificuldadeLabel = "";
+        if (dificuldade === "facil") {
+            promptDificuldadeLabel = "FÁCIL (Aplicação direta de fórmula - a resolução deve exigir apenas identificar os dados fornecidos e aplicar diretamente uma única fórmula física básica, sem complicações matemáticas ou conversões complexas).";
+        } else if (dificuldade === "medio") {
+            promptDificuldadeLabel = "MÉDIO (Exige conversão ou interpretação prévia - a resolução deve exigir conversão de unidades [ex: km/h para m/s, g para kg] ou uma interpretação conceitual prévia das variáveis e dados antes da aplicação direta das fórmulas).";
+        } else if (dificuldade === "dificil") {
+            promptDificuldadeLabel = "DIFÍCIL (Exige dedução conceitual ou múltiplas etapas - a resolução deve exigir raciocínio conceitual abstrato profundo, dedução de fórmulas interligadas ou múltiplos passos e etapas de cálculo físico e matemático para se chegar ao resultado final).";
+        }
+
         let userPrompt = `Gere uma questão de Física de nível ${promptAnoLabel} sobre o assunto: "${assunto}".
 Tipo de item: ${promptTipoLabel}.
-A questão deve ser original, desafiadora no nível certo para a série e livre de erros conceituais ou de cálculo.`;
+Nível de Dificuldade da questão: ${promptDificuldadeLabel}.
+A questão deve ser original, com o rigor físico e matemático calibrado exatamente para o nível de dificuldade selecionado, e absolutamente livre de erros conceituais ou de cálculo.`;
 
         if (estilo === "direta") {
             userPrompt += `\n\nEstilo do Item: DIRETO. Seja extremamente objetivo, sem rodeios ou narrativas longas. Foque puramente nos dados físicos e variáveis do problema (ex: 'Um gás ideal está encerrado em um recipiente de volume V...', 'Uma partícula de massa m se move com velocidade v...').`;
@@ -406,6 +417,7 @@ A questão deve ser original, desafiadora no nível certo para a série e livre 
         const assunto = selectAssunto.value;
         const tipo = selectTipo.value;
         const estilo = selectEstilo.value;
+        const dificuldade = selectDificuldade.value;
         const instrucoes = instrucoesAdicionais.value;
         const contexto = caixaContexto.value;
 
@@ -415,7 +427,7 @@ A questão deve ser original, desafiadora no nível certo para a série e livre 
         btnSpinner.classList.remove("hidden");
 
         try {
-            const questao = await gerarQuestaoIA(ano, assunto, tipo, estilo, instrucoes, contexto);
+            const questao = await gerarQuestaoIA(ano, assunto, tipo, estilo, dificuldade, instrucoes, contexto);
             if (questao) {
                 renderizarQuestao(questao, ano, assunto, tipo);
             }

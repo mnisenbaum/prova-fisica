@@ -158,6 +158,7 @@ a:hover {
 }
 
 .form-group textarea {
+    width: 100%;
     resize: vertical;
     cursor: text;
     min-height: 80px;
@@ -180,6 +181,7 @@ a:hover {
 .textarea-group {
     margin-top: 1.25rem;
     margin-bottom: 1.25rem;
+    width: 100%;
 }
 
 .action-footer {
