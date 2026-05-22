@@ -275,13 +275,14 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
             throw new Error("A IA retornou uma resposta sem escolhas de geração válidas.");
         }
 
-        // Exibe de forma discreta o consumo de tokens da geração atual
+        // Exibe de forma discreta o consumo de tokens e estimativa financeira
         if (data.usage && contadorCusto) {
             const promptT = data.usage.prompt_tokens || 0;
             const completionT = data.usage.completion_tokens || 0;
             const totalT = data.usage.total_tokens || (promptT + completionT);
+            const custoTotal = (promptT * 0.000000075) + (completionT * 0.00000030);
             
-            contadorCusto.innerHTML = `⚡ Último consumo: <strong>${totalT}</strong> tokens (Prompt: ${promptT} | Geração: ${completionT})`;
+            contadorCusto.innerHTML = `⚡ Último consumo: <strong>${totalT}</strong> tokens (Entrada: ${promptT} | Saída: ${completionT}) - Custo estimado: <strong>$ ${custoTotal.toFixed(5)}</strong>`;
             contadorCusto.classList.add("visible");
         }
 
