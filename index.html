@@ -103,6 +103,18 @@
                 <textarea id="caixaContexto" rows="3" placeholder="Ex: Descreva a história de um skatista que desce uma rampa, ou um astronauta na Lua..."></textarea>
             </div>
 
+            <!-- Checkbox para Elemento Visual -->
+            <div class="form-group checkbox-group" style="margin-top: 1rem; margin-bottom: 0.5rem; display: flex; flex-direction: row; align-items: center; gap: 0.5rem; width: 100%;">
+                <input type="checkbox" id="chkVisual" style="width: auto; cursor: pointer; height: 18px; width: 18px; accent-color: var(--color-accent);">
+                <label for="chkVisual" style="cursor: pointer; text-transform: none; font-size: 0.95rem; font-weight: 600; letter-spacing: 0; color: var(--color-primary);">Incluir Elemento Visual (Gráfico ou Diagrama)</label>
+            </div>
+
+            <!-- Caixa de Texto Específica para Gráfico/Diagrama -->
+            <div id="containerGrafico" class="form-group textarea-group" style="display: none; width: 100%;">
+                <label for="caixaGrafico">Diretrizes do Elemento Visual (Gráfico ou Diagrama)</label>
+                <textarea id="caixaGrafico" rows="3" placeholder="Ex: Desenhe um gráfico de velocidade por tempo (V x t) que mostre aceleração constante, ou descreva o circuito elétrico misto..."></textarea>
+            </div>
+
             <!-- Botão Principal de Ação e Contador de Custo -->
             <div class="action-footer">
                 <button id="btnGerar" class="btn-primary" disabled>

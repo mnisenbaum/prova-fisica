@@ -53,6 +53,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const instrucoesAdicionais = document.getElementById("instrucoesAdicionais");
     const caixaContexto = document.getElementById("caixaContexto");
     const containerContexto = document.getElementById("containerContexto");
+    const chkVisual = document.getElementById("chkVisual");
+    const containerGrafico = document.getElementById("containerGrafico");
+    const caixaGrafico = document.getElementById("caixaGrafico");
     const contadorCusto = document.getElementById("contadorCusto");
     const btnGerar = document.getElementById("btnGerar");
     const btnGerarText = document.getElementById("btnGerarText");
@@ -170,6 +173,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Controle dinâmico da exibição da caixa de gráfico/diagrama
+    chkVisual.addEventListener("change", () => {
+        if (chkVisual.checked) {
+            containerGrafico.style.display = "flex";
+            caixaGrafico.focus();
+        } else {
+            containerGrafico.style.display = "none";
+        }
+    });
+
     // Validador de botões de geração de questões
     function validarCamposGeracao() {
         const temChave = obterAPIKey() !== "";
@@ -183,8 +196,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // Função utilitária para higienizar strings JSON brutas da IA antes do parse
+    function limparJSONBruto(str) {
+        if (!str) return str;
+        
+        // 1. Remove quebras de linha literais (não escapadas) e tabulações dentro de strings JSON
+        let limpo = str.replace(/(?<!\\)\r?\n/g, " ").replace(/\t/g, " ");
+        
+        // 2. Duplica barras invertidas que não fazem parte de escapes válidos do JSON
+        // Válidos: \", \\, \/, \b, \f, \n, \r, \t, \uXXXX
+        limpo = limpo.replace(/\\(?!["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "\\\\");
+        
+        return limpo;
+    }
+
     // 6. Integração com a API do OpenRouter
-    async function gerarQuestaoIA(ano, assunto, tipo, estilo, dificuldade, instrucoes, contexto) {
+    async function gerarQuestaoIA(ano, assunto, tipo, estilo, dificuldade, instrucoes, contexto, incluirVisual, diretrizesVisual) {
         const key = obterAPIKey();
         if (!key) {
             alert("Por favor, configure sua chave de API antes de gerar.");
@@ -203,7 +230,7 @@ Você agora DEVE usar formatação LaTeX para todas as fórmulas, equações, un
 Você DEVE retornar estritamente um objeto JSON válido contendo exatamente a seguinte estrutura e nomes de chaves:
 {
   "enunciado": "O enunciado da questão formatado em português claro, rico em detalhes físicos. Utilize LaTeX para todas as fórmulas e equações físicas (inline com $ $ ou em bloco com $$ $$). Evite formatações complexas que quebrem o JSON.",
-  "svg_codigo": "Se a questão exigir ou se beneficiar de um diagrama físico ilustrativo (como blocos, planos inclinados, vetores, polias, órbitas, corpos em queda, circuitos, lentes/espelhos), forneça aqui o código de um elemento SVG completo de tamanho padrão (ex: width='100%' height='200' viewBox='0 0 400 200') contendo formas, linhas, setas e textos ilustrando fisicamente a situação do problema. Use cores de alto contraste que combinem com azul e terracota. Se a questão for sobre um gráfico de função ou não se beneficiar de um diagrama, defina esse campo estritamente como null.",
+  "svg_codigo": "O código SVG do diagrama físico ilustrativo. IMPORTANTE: Ao gerar o 'svg_codigo', você deve retornar o código em uma ÚNICA LINHA contínua, sem quebras de linha (\\n), sem tabulações e usando aspas simples dentro do HTML do SVG para NUNCA quebrar a estrutura do objeto JSON. Se a questão for sobre um gráfico de função ou não se beneficiar de um diagrama, defina esse campo estritamente como null.",
   "grafico_dados": {
     "titulo": "Título descritivo do gráfico (ex: 'Gráfico Posição x Tempo (S x t) do MRU')",
     "label_x": "Legenda e unidade do eixo horizontal X (ex: 'Tempo (s)')",
@@ -227,9 +254,10 @@ Você DEVE retornar estritamente um objeto JSON válido contendo exatamente a se
 }
 
 REGRAS CRÍTICAS PARA DIAGRAMAS E GRÁFICOS:
+- Ao gerar o 'svg_codigo', você deve retornar o código em uma ÚNICA LINHA contínua, sem quebras de linha (\\n), sem tabulações e usando aspas simples dentro do HTML do SVG para NUNCA quebrar a estrutura do objeto JSON.
 - Nunca use ambos 'svg_codigo' e 'grafico_dados' na mesma questão. Escolha um ou defina ambos como null se a questão for puramente textual.
 - Se a questão for sobre gráficos de funções de física (como S x t, V x t, P x V da Termodinâmica, etc.), defina 'grafico_dados' com pontos de dados precisos calculados fisicamente para a situação do problema, e defina 'svg_codigo' como null.
-- Se for sobre diagramas geométricos/mecânicos (plano inclinado, força, circuitos, óptica), utilize 'svg_codigo' para desenhar a ilustração de blocos, setas de vetores, ou lentes, e defina 'grafico_dados' como null.
+- Se for sobre diagramas geométricos/mecânicos (plano inclinado, força, circuitos, óptica), utilize 'svg_codigo' para desenhar a ilustração de blocos, setas de vetores, ou lentes, e defina 'grafico_dados' as null.
 
 REGRAS CRÍTICAS PARA QUESTÃO DISCURSIVA:
 Se o tipo de questão for discursiva, você DEVE estruturar o JSON da seguinte forma:
@@ -250,6 +278,12 @@ Se o tipo de questão for discursiva, você DEVE estruturar o JSON da seguinte f
 Tipo de item: ${promptTipoLabel}.
 Nível de Dificuldade da questão: ${promptDificuldadeLabel}.
 A questão deve ser original, com o rigor físico e matemático calibrado exatamente para o nível de dificuldade selecionado, e absolutamente livre de erros conceituais ou de cálculo.`;
+
+        if (incluirVisual && diretrizesVisual && diretrizesVisual.trim() !== "") {
+            userPrompt += `\n\nATENÇÃO: Você DEVE incluir um elemento visual explicativo de apoio para esta questão.
+Diretrizes e detalhes do elemento visual fornecidos pelo professor: "${diretrizesVisual.trim()}".
+Decida inteligentemente: se for um diagrama de forças, óptica, polias ou circuito, gere o código SVG em 'svg_codigo'. Se for uma função cartesiana de física, gere os pontos de dados em 'grafico_dados'.`;
+        }
 
         if (estilo === "direta") {
             userPrompt += `\n\nEstilo do Item: DIRETO. Seja extremamente objetivo, sem rodeios ou narrativas longas. Foque puramente nos dados físicos e variáveis do problema (ex: 'Um gás ideal está encerrado em um recipiente de volume V...', 'Uma partícula de massa m se move com velocidade v...').`;
@@ -305,13 +339,119 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
             contadorCusto.classList.add("visible");
         }
 
-        // Garante que o caractere de escape seja tratado corretamente se a IA enviar barras simples
-        let textoTratado = data.choices[0].message.content;
+        let jsonResposta = null;
+        const textoOriginal = data.choices[0].message.content;
+        let textoTratado = textoOriginal;
+
+        // Try standard JSON.parse first
+        try {
+            jsonResposta = JSON.parse(textoTratado);
+        } catch (eFirst) {
+            console.warn("Falha no primeiro parsing do JSON. Tentando limpeza específica e agressiva...", eFirst);
+            try {
+                // Remove blocos de marcação de código markdown se existirem
+                let textoLimpo = textoOriginal
+                    .replace(/```json/gi, "")
+                    .replace(/```/g, "")
+                    .trim();
+                
+                // Limpeza de quebras de linha e tabulações dentro do campo svg_codigo (causadores comuns de quebras)
+                const regexSvg = /("svg_codigo"\s*:\s*")([\s\S]*?)("\s*,\s*"(?:grafico_dados|opcoes)")/;
+                const match = textoLimpo.match(regexSvg);
+                if (match) {
+                    let svgConteudo = match[2];
+                    // Remove quebras de linha literais
+                    svgConteudo = svgConteudo.replace(/[\r\n]+/g, " ");
+                    // Remove tabulações
+                    svgConteudo = svgConteudo.replace(/\t+/g, " ");
+                    // Substitui aspas duplas internas por aspas simples
+                    svgConteudo = svgConteudo.replace(/\\"/g, "'").replace(/"/g, "'");
+                    
+                    textoLimpo = textoLimpo.replace(regexSvg, match[1] + svgConteudo + match[3]);
+                }
+
+                // Limpeza geral preventiva
+                textoLimpo = limparJSONBruto(textoLimpo);
+                
+                jsonResposta = JSON.parse(textoLimpo);
+            } catch (eSecond) {
+                console.error("Falha crítica no parsing do JSON da IA após limpeza agressiva:", eSecond);
+                
+                // Fallback de Recuperação Agressiva: tenta recuperar o máximo de campos possível usando Regex
+                let enunciadoRecuperado = "";
+                let opcoesRecuperadas = null;
+                let respostaCorretaRecuperada = "Não foi possível recuperar.";
+                let gabaritoRecuperado = "Erro ao decodificar resposta completa.";
+
+                try {
+                    // 1. Tentar capturar o enunciado
+                    const matchEnunciado = textoOriginal.match(/"enunciado"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+                    if (matchEnunciado && matchEnunciado[1]) {
+                        enunciadoRecuperado = matchEnunciado[1]
+                            .replace(/\\"/g, '"')
+                            .replace(/\\\\/g, '\\')
+                            .replace(/\\n/g, '\n');
+                    } else {
+                        // Regex fallback caso aspas ou quebras de linha tenham quebrado a aspa de fechamento
+                        const matchEnunciadoSimples = textoOriginal.match(/"enunciado"\s*:\s*"([\s\S]*?)"\s*,\s*"/);
+                        if (matchEnunciadoSimples && matchEnunciadoSimples[1]) {
+                            enunciadoRecuperado = matchEnunciadoSimples[1].replace(/[\r\n]+/g, " ");
+                        }
+                    }
+
+                    // 2. Tentar capturar resposta correta
+                    const matchResposta = textoOriginal.match(/"resposta_correta"\s*:\s*"([A-E])"/i);
+                    if (matchResposta && matchResposta[1]) {
+                        respostaCorretaRecuperada = matchResposta[1].toUpperCase();
+                    }
+
+                    // 3. Tentar capturar opções de múltipla escolha
+                    const matchOpcoes = textoOriginal.match(/"opcoes"\s*:\s*\{([\s\S]*?)\}/);
+                    if (matchOpcoes && matchOpcoes[1]) {
+                        opcoesRecuperadas = {};
+                        const letras = ["A", "B", "C", "D", "E"];
+                        letras.forEach(letra => {
+                            const regexLetra = new RegExp(`"${letra}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`, "i");
+                            const matchL = matchOpcoes[1].match(regexLetra);
+                            if (matchL && matchL[1]) {
+                                opcoesRecuperadas[letra] = matchL[1]
+                                    .replace(/\\"/g, '"')
+                                    .replace(/\\\\/g, '\\')
+                                    .replace(/\\n/g, '\n');
+                            }
+                        });
+                    }
+
+                    // 4. Tentar capturar gabarito detalhado
+                    const matchGabarito = textoOriginal.match(/"gabarito_detalhado"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+                    if (matchGabarito && matchGabarito[1]) {
+                        gabaritoRecuperado = matchGabarito[1]
+                            .replace(/\\"/g, '"')
+                            .replace(/\\\\/g, '\\')
+                            .replace(/\\n/g, '\n');
+                    }
+                } catch (eExtraction) {
+                    console.error("Erro na extração manual via regex:", eExtraction);
+                }
+
+                if (!enunciadoRecuperado) {
+                    enunciadoRecuperado = "Não foi possível recuperar o enunciado formatado. O texto bruto retornado pela IA está no gabarito detalhado abaixo.";
+                }
+
+                // Constrói objeto de fallback com informações recuperadas para não perder tokens
+                jsonResposta = {
+                    enunciado: `⚠️ <strong>[Erro de Processamento da IA - Questão Recuperada]</strong><br><br>${enunciadoRecuperado}`,
+                    opcoes: opcoesRecuperadas,
+                    resposta_correta: respostaCorretaRecuperada,
+                    gabarito_detalhado: `Esta questão foi recuperada após uma falha de formatação (JSON inválido) no retorno da Inteligência Artificial. Os tokens não foram perdidos!<br><br><strong>Gabarito Recuperado:</strong><br>${gabaritoRecuperado}<br><br><strong>Texto bruto recebido da API:</strong><br><pre style='white-space: pre-wrap; font-size: 0.8rem; background: #fee; padding: 10px; border-radius: 4px;'>${formatarTextoFisica(textoOriginal)}</pre>`,
+                    svg_codigo: null,
+                    grafico_dados: null
+                };
+
+                alert("⚠️ A IA gerou a questão, mas houve um erro de formatação no envio (JSON quebrado por quebras de linha ou caracteres especiais). O FísicaGen recuperou com sucesso o enunciado e os campos da questão para que você não perdesse os tokens consumidos!");
+            }
+        }
         
-        // Substituição de segurança para evitar que escapes inválidos de LaTeX quebrem o parsing JSON
-        textoTratado = textoTratado.replace(/\\([()$])/g, "\\\\$1");
-        
-        const jsonResposta = JSON.parse(textoTratado);
         return jsonResposta;
     }
 
@@ -538,6 +678,8 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
         const dificuldade = selectDificuldade.value;
         const instrucoes = instrucoesAdicionais.value;
         const contexto = caixaContexto.value;
+        const incluirVisual = chkVisual.checked;
+        const diretrizesVisual = caixaGrafico.value;
 
         // Ativa estado de carregamento
         btnGerar.disabled = true;
@@ -545,7 +687,7 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
         btnSpinner.classList.remove("hidden");
 
         try {
-            const questao = await gerarQuestaoIA(ano, assunto, tipo, estilo, dificuldade, instrucoes, contexto);
+            const questao = await gerarQuestaoIA(ano, assunto, tipo, estilo, dificuldade, instrucoes, contexto, incluirVisual, diretrizesVisual);
             if (questao) {
                 renderizarQuestao(questao, ano, assunto, tipo);
             }
