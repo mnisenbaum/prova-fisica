@@ -16,3 +16,6 @@
 - [x] **[Melhoria]** Adicionar suporte completo a equações e fórmulas científicas em LaTeX via CDN do MathJax v3.
 - [x] **[Melhoria]** Calibrar o prompt de sistema da IA para obrigar o uso de `\\( ... \\)` para fórmulas inline e `$$ ... $$` para equações em bloco.
 - [x] **[Melhoria]** Forçar re-renderização assíncrona do MathJax via `window.MathJax.typesetPromise()` após a injeção dinâmica de novas questões.
+- [x] **[Correção]** Corrigir a renderização do LaTeX substituindo delimitadores inline pelo estável cifrão simples (`$`), evitando conflitos de escape de barras invertidas com o OpenRouter.
+- [x] **[Melhoria]** Adicionar uma rotina de segurança Regex antes do `JSON.parse` para restaurar e validar possíveis escapes de barras invertidas em delimitadores especiais `(`, `)` e `$`.
+- [x] **[Melhoria]** Ajustar `formatarTextoFisica` para ignorar filtros legados se a fórmula contiver delimitadores de cifrão simples (`$`).
