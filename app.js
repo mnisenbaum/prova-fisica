@@ -203,6 +203,18 @@ Você agora DEVE usar formatação LaTeX para todas as fórmulas, equações, un
 Você DEVE retornar estritamente um objeto JSON válido contendo exatamente a seguinte estrutura e nomes de chaves:
 {
   "enunciado": "O enunciado da questão formatado em português claro, rico em detalhes físicos. Utilize LaTeX para todas as fórmulas e equações físicas (inline com $ $ ou em bloco com $$ $$). Evite formatações complexas que quebrem o JSON.",
+  "svg_codigo": "Se a questão exigir ou se beneficiar de um diagrama físico ilustrativo (como blocos, planos inclinados, vetores, polias, órbitas, corpos em queda, circuitos, lentes/espelhos), forneça aqui o código de um elemento SVG completo de tamanho padrão (ex: width='100%' height='200' viewBox='0 0 400 200') contendo formas, linhas, setas e textos ilustrando fisicamente a situação do problema. Use cores de alto contraste que combinem com azul e terracota. Se a questão for sobre um gráfico de função ou não se beneficiar de um diagrama, defina esse campo estritamente como null.",
+  "grafico_dados": {
+    "titulo": "Título descritivo do gráfico (ex: 'Gráfico Posição x Tempo (S x t) do MRU')",
+    "label_x": "Legenda e unidade do eixo horizontal X (ex: 'Tempo (s)')",
+    "label_y": "Legenda e unidade do eixo vertical Y (ex: 'Posição (m)')",
+    "pontos": [
+      {"x": 0, "y": 10},
+      {"x": 1, "y": 15},
+      {"x": 2, "y": 20},
+      {"x": 3, "y": 25}
+    ]
+  },
   "opcoes": {
     "A": "Texto completo para a alternativa A contendo fórmulas em LaTeX se aplicável",
     "B": "Texto completo para a alternativa B contendo fórmulas em LaTeX se aplicável",
@@ -213,6 +225,11 @@ Você DEVE retornar estritamente um objeto JSON válido contendo exatamente a se
   "resposta_correta": "Apenas a letra correspondente à alternativa correta (A, B, C, D ou E)",
   "gabarito_detalhado": "Uma explicação física e matemática passo a passo detalhando o porquê da resposta correta utilizando LaTeX para todas as fórmulas e cálculos."
 }
+
+REGRAS CRÍTICAS PARA DIAGRAMAS E GRÁFICOS:
+- Nunca use ambos 'svg_codigo' e 'grafico_dados' na mesma questão. Escolha um ou defina ambos como null se a questão for puramente textual.
+- Se a questão for sobre gráficos de funções de física (como S x t, V x t, P x V da Termodinâmica, etc.), defina 'grafico_dados' com pontos de dados precisos calculados fisicamente para a situação do problema, e defina 'svg_codigo' como null.
+- Se for sobre diagramas geométricos/mecânicos (plano inclinado, força, circuitos, óptica), utilize 'svg_codigo' para desenhar a ilustração de blocos, setas de vetores, ou lentes, e defina 'grafico_dados' como null.
 
 REGRAS CRÍTICAS PARA QUESTÃO DISCURSIVA:
 Se o tipo de questão for discursiva, você DEVE estruturar o JSON da seguinte forma:
@@ -320,6 +337,21 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
             </div>
         `;
 
+        // Renderiza diagramas SVG ou placeholders para gráficos científicos (Chart.js)
+        if (questaoObj.svg_codigo && questaoObj.svg_codigo.trim() !== "") {
+            questaoHtml += `
+                <div class="svg-container-diagrama">
+                    ${questaoObj.svg_codigo}
+                </div>
+            `;
+        } else if (questaoObj.grafico_dados && typeof questaoObj.grafico_dados === "object") {
+            questaoHtml += `
+                <div class="chart-container">
+                    <canvas id="chart-${questaoContador}"></canvas>
+                </div>
+            `;
+        }
+
         // Renderiza Opções de acordo com o tipo
         if (tipo === "multipla" && questaoObj.opcoes) {
             questaoHtml += `<div class="questao-opcoes">`;
@@ -369,6 +401,76 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
 
         card.innerHTML = questaoHtml;
         provaContainer.appendChild(card);
+
+        // Inicializa o gráfico do Chart.js se houver dados de gráfico
+        if (questaoObj.grafico_dados && typeof questaoObj.grafico_dados === "object") {
+            const canvasElement = document.getElementById(`chart-${questaoContador}`);
+            if (canvasElement) {
+                const ctx = canvasElement.getContext('2d');
+                const dadosPontos = questaoObj.grafico_dados.pontos || [];
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: questaoObj.grafico_dados.titulo || 'Gráfico de Função Física',
+                            data: dadosPontos,
+                            borderColor: '#d35400', // Terracota acadêmico do FísicaGen
+                            backgroundColor: 'rgba(211, 84, 0, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.15,
+                            fill: false,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                position: 'bottom',
+                                title: {
+                                    display: true,
+                                    text: questaoObj.grafico_dados.label_x || 'Eixo X',
+                                    color: '#2c3e50',
+                                    font: { weight: 'bold', size: 12 }
+                                },
+                                ticks: {
+                                    color: '#2c3e50'
+                                },
+                                grid: {
+                                    color: '#dcdde1'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: questaoObj.grafico_dados.label_y || 'Eixo Y',
+                                    color: '#2c3e50',
+                                    font: { weight: 'bold', size: 12 }
+                                },
+                                ticks: {
+                                    color: '#2c3e50'
+                                },
+                                grid: {
+                                    color: '#dcdde1'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#2c3e50',
+                                    font: { weight: '600' }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
 
         // Reprocessa fórmulas LaTeX com MathJax
         if (window.MathJax && window.MathJax.typesetPromise) {

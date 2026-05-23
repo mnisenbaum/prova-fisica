@@ -822,6 +822,36 @@ a:hover {
 }
 
 /* ==========================================================================
+   9. Container de Gráficos e Diagramas Científicos
+   ========================================================================== */
+.chart-container,
+.svg-container-diagrama {
+    max-width: 500px;
+    margin: 1.5rem auto;
+    background-color: var(--bg-card);
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.chart-container:hover,
+.svg-container-diagrama:hover {
+    box-shadow: var(--shadow-md);
+    border-color: rgba(211, 84, 0, 0.15);
+}
+
+.svg-container-diagrama svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ==========================================================================
    10. Folha de Estilos de Impressão Escolar Oficial (@media print)
    ========================================================================== */
 @media print {
@@ -943,6 +973,16 @@ a:hover {
     .gabarito-explicacao {
         color: #000000 !important;
         border-top: 1px dashed #000000 !important;
+    }
+
+    .chart-container,
+    .svg-container-diagrama {
+        border: 1px solid #000000 !important;
+        box-shadow: none !important;
+        background-color: #ffffff !important;
+        margin: 1rem auto !important;
+        padding: 0.5rem !important;
+        page-break-inside: avoid;
     }
 
     /* Ocultação forçada se a classe hide-gabaritos estiver ativa */
