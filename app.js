@@ -203,9 +203,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // 1. Remove quebras de linha literais (não escapadas) e tabulações dentro de strings JSON
         let limpo = str.replace(/(?<!\\)\r?\n/g, " ").replace(/\t/g, " ");
         
-        // 2. Duplica barras invertidas que não fazem parte de escapes válidos do JSON
-        // Válidos: \", \\, \/, \b, \f, \n, \r, \t, \uXXXX
-        limpo = limpo.replace(/\\(?!["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, "\\\\");
+        // 2. Duplica barras invertidas para preservar comandos LaTeX e outros caracteres especiais,
+        // exceto aspas escapadas (\") e barras invertidas já escapadas (\\)
+        limpo = limpo.replace(/\\(?![\\"])/g, "\\\\");
         
         return limpo;
     }
@@ -341,10 +341,10 @@ Decida inteligentemente: se for um diagrama de forças, óptica, polias ou circu
 
         let jsonResposta = null;
         const textoOriginal = data.choices[0].message.content;
-        let textoTratado = textoOriginal;
 
-        // Try standard JSON.parse first
+        // 1ª tentativa: Limpeza e escape de barras para preservar LaTeX
         try {
+            let textoTratado = limparJSONBruto(textoOriginal);
             jsonResposta = JSON.parse(textoTratado);
         } catch (eFirst) {
             console.warn("Falha no primeiro parsing do JSON. Tentando limpeza específica e agressiva...", eFirst);
@@ -370,7 +370,7 @@ Decida inteligentemente: se for um diagrama de forças, óptica, polias ou circu
                     textoLimpo = textoLimpo.replace(regexSvg, match[1] + svgConteudo + match[3]);
                 }
 
-                // Limpeza geral preventiva
+                // Limpeza geral preventiva e escape de barras
                 textoLimpo = limparJSONBruto(textoLimpo);
                 
                 jsonResposta = JSON.parse(textoLimpo);
@@ -449,6 +449,23 @@ Decida inteligentemente: se for um diagrama de forças, óptica, polias ou circu
                 };
 
                 alert("⚠️ A IA gerou a questão, mas houve um erro de formatação no envio (JSON quebrado por quebras de linha ou caracteres especiais). O FísicaGen recuperou com sucesso o enunciado e os campos da questão para que você não perdesse os tokens consumidos!");
+            }
+        }
+
+        // Pós-processamento: Restaura quebras de linha literais (\n) que foram escapadas para o JSON
+        if (jsonResposta) {
+            if (jsonResposta.enunciado) {
+                jsonResposta.enunciado = jsonResposta.enunciado.replace(/\\n/g, "\n");
+            }
+            if (jsonResposta.gabarito_detalhado) {
+                jsonResposta.gabarito_detalhado = jsonResposta.gabarito_detalhado.replace(/\\n/g, "\n");
+            }
+            if (jsonResposta.opcoes) {
+                for (let key in jsonResposta.opcoes) {
+                    if (jsonResposta.opcoes[key]) {
+                        jsonResposta.opcoes[key] = jsonResposta.opcoes[key].replace(/\\n/g, "\n");
+                    }
+                }
             }
         }
         
