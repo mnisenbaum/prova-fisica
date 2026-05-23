@@ -198,25 +198,27 @@ document.addEventListener("DOMContentLoaded", () => {
         const systemPrompt = `Você é um experiente Professor de Física especialista em elaboração de itens de avaliação de alto nível alinhados à BNCC brasileira.
 Sua tarefa é gerar uma questão inédita, cientificamente precisa e didaticamente rica sobre o assunto solicitado, seguindo estritamente as diretrizes de estilo fornecidas.
 
+Você agora DEVE usar formatação LaTeX para todas as fórmulas, equações, unidades complexas e símbolos de física (como delta, frações, potências). Para fórmulas na mesma linha do texto (inline), use a sintaxe \\\\( formula \\\\). Para equações isoladas (em bloco), use $$ formula $$.
+
 Você DEVE retornar estritamente um objeto JSON válido contendo exatamente a seguinte estrutura e nomes de chaves:
 {
-  "enunciado": "O enunciado da questão formatado em português claro, rico em detalhes físicos. Se houver equações matemáticas ou fórmulas, represente-as de maneira limpa em linha usando notações clássicas da física (ex: E = m.c² ou V = Vo + a.t). Evite formatações complexas que quebrem o JSON.",
+  "enunciado": "O enunciado da questão formatado em português claro, rico em detalhes físicos. Utilize LaTeX para todas as fórmulas e equações físicas (inline com \\\\( \\\\) ou em bloco com $$ $$). Evite formatações complexas que quebrem o JSON.",
   "opcoes": {
-    "A": "Texto completo para a alternativa A",
-    "B": "Texto completo para a alternativa B",
-    "C": "Texto completo para a alternativa C",
-    "D": "Texto completo para a alternativa D",
-    "E": "Texto completo para a alternativa E"
+    "A": "Texto completo para a alternativa A contendo fórmulas em LaTeX se aplicável",
+    "B": "Texto completo para a alternativa B contendo fórmulas em LaTeX se aplicável",
+    "C": "Texto completo para a alternativa C contendo fórmulas em LaTeX se aplicável",
+    "D": "Texto completo para a alternativa D contendo fórmulas em LaTeX se aplicável",
+    "E": "Texto completo para a alternativa E contendo fórmulas em LaTeX se aplicável"
   },
   "resposta_correta": "Apenas a letra correspondente à alternativa correta (A, B, C, D ou E)",
-  "gabarito_detalhado": "Uma explicação física e matemática passo a passo detalhando o porquê da resposta correta e demonstrando o erro nas alternativas incorretas."
+  "gabarito_detalhado": "Uma explicação física e matemática passo a passo detalhando o porquê da resposta correta utilizando LaTeX para todas as fórmulas e cálculos."
 }
 
 REGRAS CRÍTICAS PARA QUESTÃO DISCURSIVA:
 Se o tipo de questão for discursiva, você DEVE estruturar o JSON da seguinte forma:
 - Defina o campo "opcoes" estritamente como null.
-- No campo "resposta_correta", forneça uma descrição curta da resposta esperada (o padrão de resposta exato para pontuação máxima).
-- No campo "gabarito_detalhado", elabore a explicação passo a passo dos cálculos e conceitos físicos necessários para a solução completa, além de critérios de correção sugeridos.`;
+- No campo "resposta_correta", forneça uma descrição curta da resposta esperada (o padrão de resposta exato para pontuação máxima utilizando LaTeX para fórmulas).
+- No campo "gabarito_detalhado", elabore a explicação passo a passo dos cálculos e conceitos físicos necessários para a solução completa utilizando LaTeX, além de critérios de correção sugeridos.`;
 
         let promptDificuldadeLabel = "";
         if (dificuldade === "facil") {
@@ -362,6 +364,11 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
         card.innerHTML = questaoHtml;
         provaContainer.appendChild(card);
 
+        // Reprocessa fórmulas LaTeX com MathJax
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise();
+        }
+
         // Listener para o botão de exclusão individual
         const btnDelete = card.querySelector(".btn-delete-questao");
         btnDelete.addEventListener("click", () => {
@@ -379,10 +386,12 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
         
-        // Simples substituição de subscrito/sobrescrito para fórmulas como H2O ou m/s2
-        textoSeguro = textoSeguro
-            .replace(/\^([0-9a-zA-Z+-]+)/g, "<sup>$1</sup>") // Sobrescrito ex: x^2 -> x²
-            .replace(/_([0-9a-zA-Z]+)/g, "<sub>$1</sub>");    // Subscrito ex: H_2O -> H₂O
+        // Só aplica substituição legada de sobrescrito/subscrito se NÃO contiver LaTeX
+        if (!texto.includes("\\(") && !texto.includes("$$")) {
+            textoSeguro = textoSeguro
+                .replace(/\^([0-9a-zA-Z+-]+)/g, "<sup>$1</sup>") // Sobrescrito ex: x^2 -> x²
+                .replace(/_([0-9a-zA-Z]+)/g, "<sub>$1</sub>");    // Subscrito ex: H_2O -> H₂O
+        }
             
         return textoSeguro;
     }
