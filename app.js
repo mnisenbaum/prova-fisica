@@ -198,11 +198,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const systemPrompt = `Você é um experiente Professor de Física especialista em elaboração de itens de avaliação de alto nível alinhados à BNCC brasileira.
 Sua tarefa é gerar uma questão inédita, cientificamente precisa e didaticamente rica sobre o assunto solicitado, seguindo estritamente as diretrizes de estilo fornecidas.
 
-Você agora DEVE usar formatação LaTeX para todas as fórmulas, equações, unidades complexas e símbolos de física (como delta, frações, potências). Para fórmulas na mesma linha do texto (inline), use a sintaxe \\\\( formula \\\\). Para equações isoladas (em bloco), use $$ formula $$.
+Você agora DEVE usar formatação LaTeX para todas as fórmulas, equações, unidades complexas e símbolos de física (como delta, frações, potências). Para fórmulas matemáticas, frações ou unidades na mesma linha do texto (inline), envolva-as SEMPRE entre um único cifrão, por exemplo: $5 \\text{cm}$ ou $\\frac{1}{f} = \\frac{1}{D_o} + \\frac{1}{D_i}$. Para equações grandes e isoladas, use dois cifrões ($$ ... $$).
 
 Você DEVE retornar estritamente um objeto JSON válido contendo exatamente a seguinte estrutura e nomes de chaves:
 {
-  "enunciado": "O enunciado da questão formatado em português claro, rico em detalhes físicos. Utilize LaTeX para todas as fórmulas e equações físicas (inline com \\\\( \\\\) ou em bloco com $$ $$). Evite formatações complexas que quebrem o JSON.",
+  "enunciado": "O enunciado da questão formatado em português claro, rico em detalhes físicos. Utilize LaTeX para todas as fórmulas e equações físicas (inline com $ $ ou em bloco com $$ $$). Evite formatações complexas que quebrem o JSON.",
   "opcoes": {
     "A": "Texto completo para a alternativa A contendo fórmulas em LaTeX se aplicável",
     "B": "Texto completo para a alternativa B contendo fórmulas em LaTeX se aplicável",
@@ -288,8 +288,14 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
             contadorCusto.classList.add("visible");
         }
 
-        const rawContent = data.choices[0].message.content;
-        return JSON.parse(rawContent);
+        // Garante que o caractere de escape seja tratado corretamente se a IA enviar barras simples
+        let textoTratado = data.choices[0].message.content;
+        
+        // Substituição de segurança para evitar que escapes inválidos de LaTeX quebrem o parsing JSON
+        textoTratado = textoTratado.replace(/\\([()$])/g, "\\\\$1");
+        
+        const jsonResposta = JSON.parse(textoTratado);
+        return jsonResposta;
     }
 
     // 7. Renderização da Questão no Prova Container
@@ -387,7 +393,7 @@ A questão deve ser original, com o rigor físico e matemático calibrado exatam
             .replace(/>/g, "&gt;");
         
         // Só aplica substituição legada de sobrescrito/subscrito se NÃO contiver LaTeX
-        if (!texto.includes("\\(") && !texto.includes("$$")) {
+        if (!texto.includes("\\(") && !texto.includes("$$") && !texto.includes("$")) {
             textoSeguro = textoSeguro
                 .replace(/\^([0-9a-zA-Z+-]+)/g, "<sup>$1</sup>") // Sobrescrito ex: x^2 -> x²
                 .replace(/_([0-9a-zA-Z]+)/g, "<sub>$1</sub>");    // Subscrito ex: H_2O -> H₂O
