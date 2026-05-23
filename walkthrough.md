@@ -1,34 +1,35 @@
-# Walkthrough - FísicaGen (Suporte Completo e Robusto a LaTeX com MathJax)
+# Walkthrough - FísicaGen (Suporte a Gráficos Científicos e Diagramas Físicos)
 
-Aprimoramos o **FísicaGen** com suporte oficial a notação matemática e científica através da integração com o **MathJax v3**. Resolvemos o conflito crítico de escapes de barras invertidas (`\\`) que impediam a renderização de equações em ambientes de API (como OpenRouter), migrando para delimitadores de cifrão simples (`$`) e implementando um fluxo de sanitização JSON de segurança.
+Evoluímos de forma fantástica a inteligência visual do **FísicaGen**. Agora, o gerador de avaliações é capaz de renderizar elementos gráficos reais em alta qualidade: **diagramas físicos ilustrativos** (usando vetores SVG nativos) e **gráficos cartesianos precisos de funções físicas** (usando a biblioteca Chart.js).
 
 ---
 
 ## 🛠️ O que foi Desenvolvido na Evolução
 
 1. **Versionamento via Git**:
-   - Criado commit de controle anterior: `"Antes de corrigir a renderização do LaTeX"`.
-   - Criado commit de evolução posterior: `"Refatoração: Renderização de LaTeX corrigida usando delimitadores de cifrão"`.
-   - Criado commit de ajuste fino de carregamento: `"Correção: Ajustada ordem de carregamento do MathJax, remoção do polyfill e uso do bundle tex-mml-chtml para renderização perfeita de LaTeX"`.
+   - Criado commit de controle anterior: `"Antes de implementar Chart.js para gráficos científicos"`.
+   - Criado commit de evolução posterior: `"Refatoração: Implementado Chart.js para gráficos científicos e suporte a diagramas físicos em SVG"`.
 
-2. **[index.html](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/index.html)** (Configuração e Blindagem do MathJax):
-   - **Ordem de Inicialização do Objeto**: Ajustamos a ordem dos scripts no `<head>` para que a declaração do objeto `window.MathJax` seja executada **obrigatoriamente antes** do carregamento do script da CDN, permitindo que as diretivas de parse de cifrão simples (`$`) sejam aplicadas com sucesso.
-   - **Substituição de Bundle**: Alteramos a fonte da CDN de `mathjax.js` para o pacote completo pré-compilado de TeX e HTML do MathJax v3 (`es5/tex-mml-chtml.js`), garantindo que o interpretador de fórmulas matemáticas esteja nativamente acoplado ao script.
-   - **Remoção de Elemento Inseguro**: Removemos permanentemente o script `polyfill.io`, que se encontra depreciado, bloqueado por navegadores modernos/adblockers devido a riscos de segurança, e que é totalmente desnecessário para a operação do MathJax v3 moderno.
+2. **[index.html](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/index.html)** (Biblioteca Chart.js):
+   - Adicionada a biblioteca oficial **Chart.js** via CDN jsDelivr no `<head>` da página para habilitar o motor de desenho de eixos e curvas em tempo de execução.
 
-3. **[app.js](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/app.js)** (Engenharia de Prompt e Tratamento de Strings):
-   - **Atualização do Prompt de Sistema**: Instruímos a IA a utilizar obrigatoriamente cifrão simples (`$`) para delimitar equações de física e fórmulas inline (ex: `$5 \text{cm}$` ou `$\frac{1}{f} = ...$`) e cifrões duplos (`$$`) para blocos de destaque.
-   - **Rotina de Segurança de Strings**: Inserimos um interceptador Regex antes de efetuar o `JSON.parse()` na resposta do OpenRouter. Esta rotina duplica escapes de barras invertidas inválidos em frente a delimitadores especiais:
-     ```javascript
-     textoTratado = textoTratado.replace(/\\([()$])/g, "\\\\$1");
-     ```
-     Isso impede erros de decodificação de JSON e garante que a barra invertida seja mantida no objeto Javascript final.
-   - **Compatibilidade do Filtro de Texto**: Expandimos a segurança do `formatarTextoFisica()` para bypassar as regras legadas de sobrescritos e subscritos quando a string contém delimitadores de cifrão simples (`$`), impedindo colisões de caracteres e protegendo operadores complexos da notação científica.
+3. **[style.css](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/style.css)** (Premium UI e Impressão):
+   - **Estilo de Tela**: Adicionadas as regras de design para `.chart-container` e `.svg-container-diagrama` limitando a largura em `500px` com paddings uniformes, cores integradas com a paleta do FísicaGen (`var(--bg-card)` e `var(--color-border)`), bordas arredondadas e efeito sutil de hover com brilho e sombreamento.
+   - **Estilo Impresso (`@media print`)**: Adicionados os overrides de impressão para os gráficos. As bordas são convertidas para preto sólido e as sombras e fundos são removidos, forçando o gráfico/diagrama a sair limpo, nítido e em alto contraste na prova impressa. Implementado `page-break-inside: avoid` para impedir que quebras de página cortem ilustrações ao meio.
+
+4. **[app.js](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/app.js)** (JSON Inteligente e Acoplamento no DOM):
+   - **Nova Estrutura JSON**: Atualizamos o prompt de sistema direcionando a IA a retornar campos mutuamente exclusivos de recursos visuais de acordo com o assunto:
+     - `svg_codigo`: Código SVG bruto para esquemas de mecânica (blocos, vetores, planos inclinados, polias), óptica (lentes, raios), circuitos e órbitas.
+     - `grafico_dados`: Objeto contendo `titulo`, `label_x` (ex: "Tempo (s)"), `label_y` (ex: "Velocidade (m/s)") e um array de coordenadas cartesianas exatas `pontos` (ex: `[{x: 0, y: 10}, {x: 1, y: 20}]`).
+   - **Renderização e Injeção Dinâmica**:
+     - Se `svg_codigo` for preenchido pela IA, o SVG é embutido diretamente no fluxo HTML.
+     - Se `grafico_dados` for fornecido, a aplicação insere dinamicamente um canvas `<canvas id="chart-${questaoContador}"></canvas>` e constrói o gráfico de linhas cartesianas usando a biblioteca Chart.js.
+     - O gráfico é desenhado com a cor terracota tema (`#d35400`), grades integradas e fontes escuras de alta legibilidade, respeitando eixos cartesianos lineares reais.
 
 ---
 
 ## 🧪 Validação dos Testes
 
-- [x] **Renderização Científica Nativa**: Equações complexas (como equações cinemáticas, potências de dez, notações científicas e frações) são perfeitamente renderizadas em tempo de execução no container da folha de prova.
-- [x] **Segurança e Fluidez**: O MathJax compila instantaneamente após a adição de cada questão, sem bloqueios de rede devido ao domínio antigo do polyfill e sem falhas de decodificação sintática.
-- [x] **Layout Limpo de Impressão**: Os blocos de fórmulas e gabaritos respondem perfeitamente aos estilos de visualização e são enviados ao diálogo de impressão com nitidez absoluta.
+- [x] **Visualização Científica de Alta Fidelidade**: O FísicaGen agora é capaz de exibir gráficos reais de MRU/MRUV e diagramas mecânicos de alto nível didático integrados às questões geradas.
+- [x] **Compatibilidade com LaTeX (MathJax)**: Equações do MathJax e estimativas de custo de tokens operam em plena harmonia com a biblioteca Chart.js.
+- [x] **Impressão Perfeita**: Em testes de diálogo de impressão do navegador, os gráficos cartesianos são convertidos em vetores nítidos sem desfoques e as quebras de página são calculadas sem quebras de layout.

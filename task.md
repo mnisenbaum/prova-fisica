@@ -20,3 +20,8 @@
 - [x] **[Melhoria]** Adicionar uma rotina de segurança Regex antes do `JSON.parse` para restaurar e validar possíveis escapes de barras invertidas em delimitadores especiais `(`, `)` e `$`.
 - [x] **[Melhoria]** Ajustar `formatarTextoFisica` para ignorar filtros legados se a fórmula contiver delimitadores de cifrão simples (`$`).
 - [x] **[Correção]** Resolver o carregamento do MathJax definindo `window.MathJax` antes da importação do script CDN, removendo o polyfill.io bloqueado por adblockers/segurança de navegadores, e importando o bundle completo de fórmulas `tex-mml-chtml.js`.
+- [x] **[Melhoria]** Adicionar suporte completo a elementos gráficos na avaliação física de forma inteligente.
+- [x] **[Melhoria]** Configurar a biblioteca Chart.js via CDN e criar a classe CSS `.chart-container` com tokens acadêmicos compatíveis com o tema em style.css.
+- [x] **[Melhoria]** Expandir o prompt de resposta JSON da IA incluindo as chaves mutuamente exclusivas `svg_codigo` (para diagramas de forças, óptica, polias e circuitos) e `grafico_dados` (para eixos cartesianos reais de funções como MRU/MRUV/gases).
+- [x] **[Melhoria]** Implementar o renderizador e construtor dinâmico do Chart.js com escalas lineares e cores terracota em app.js.
+- [x] **[Melhoria]** Criar regras de impressão `@media print` para renderizar diagramas e gráficos científicos de forma nítida em alta fidelidade preto e branco com quebra de página protegida (`avoid`).
