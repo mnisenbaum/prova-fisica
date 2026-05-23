@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // 2. Duplica barras invertidas para preservar comandos LaTeX e outros caracteres especiais,
         // exceto aspas escapadas (\") e barras invertidas já escapadas (\\)
-        limpo = limpo.replace(/\\(?![\\"])/g, "\\\\");
+        limpo = limpo.replace(/(?<!\\)\\(?![\\"])/g, "\\\\");
         
         return limpo;
     }
