@@ -1,41 +1,36 @@
-# Walkthrough - FísicaGen (Alinhamento de Layout, Níveis de Dificuldade e Estimativa de Custo em Dólar)
+# Walkthrough - FísicaGen (Suporte Completo a LaTeX com MathJax)
 
-Aprimoramos o **FísicaGen** trazendo um controle refinado sobre o **Nível de Dificuldade** das questões pedagógicas, resolvendo por completo a consistência do design do painel ao trabalhar com cenários e adicionando uma **estimativa financeira de custo em dólares ($)** para cada geração de questão.
+Aprimoramos o **FísicaGen** com suporte oficial a notação matemática e científica através da integração com o **MathJax v3**. Agora, todas as equações, frações, potências, constantes e símbolos físicos (como letras gregas e deltas) são renderizados de forma limpa e em alta qualidade acadêmica no papel de prova.
 
 ---
 
 ## 🛠️ O que foi Desenvolvido na Evolução
 
 1. **Versionamento via Git**:
-   - Inicializado o repositório local e configurado arquivo `.gitignore` (para manter chaves de API locais fora do versionamento).
-   - Realizado commit de controle anterior: `"Antes de adicionar cálculo de custo em dólar"`.
-   - Realizado commit de controle posterior: `"Refatoração: Cálculo de custo em dólar implementado com sucesso"`.
+   - Criado commit de controle anterior: `"Antes de adicionar suporte a LaTeX"`.
+   - Criado commit de evolução posterior: `"Refatoração: Suporte a fórmulas LaTeX implementado com MathJax"`.
 
-2. **[index.html](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/index.html) e [style.css](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/style.css)** (Correção Visual e Alinhamento):
-   - **Visual do Cenário**: Corrigido o seletor `#containerContexto` para herdar perfeitamente a consistência do `.form-group` ao alternar sua exibição. Ao invés de `display: block`, o JavaScript agora injeta `display: flex`, mantendo a caixa de texto do cenário de física contextualizada com **100% de largura disponível**, idêntica à de instruções gerais.
-   - **Nova Grade Responsiva**: Adicionado o dropdown de **Nível de Dificuldade** (`id="nivelDificuldade"`) na grade de parâmetros. As opções disponíveis são:
-     * *Fácil (Aplicação direta de fórmula)* (`value="facil"`)
-     * *Médio (Exige conversão ou interpretação prévia)* (`value="medio"`)
-     * *Difícil (Exige dedução conceitual ou múltiplas etapas)* (`value="dificil"`)
+2. **[index.html](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/index.html)** (CDN MathJax):
+   - Adicionados os scripts de inicialização e a biblioteca CDN do **MathJax v3** e polyfill no `<head>` da página.
+   - Configurado o delimitador padrão para o parser identificar:
+     * **Inline (mesma linha)**: delimitados por `\\(` e `\\)` (interpretados como LaTeX no fluxo do texto).
+     * **Display (em bloco)**: delimitados por `$$` e `$$` (para fórmulas complexas centralizadas).
 
-3. **[app.js](file:///g:/Meu%20Drive/#-Estudos Dev/prova-fisica-2/app.js)** (Atualização da Inteligência da IA e Custo):
-   - **Captura da Dificuldade**: Acelerado o binding de `#nivelDificuldade` que agora lê dinamicamente a escolha do professor.
-   - **Calibração Pedagógica do Prompt**:
-     - *Fácil*: Instrui a IA a gerar questões onde o aluno apenas identifica as variáveis dadas e aplica uma única fórmula física direta, sem complicações extras.
-     - *Médio*: Instrui a IA a exigir conversão de unidades (como *km/h* para *m/s*) ou análise conceitual elementar prévia antes do cálculo básico.
-     - *Difícil*: Direciona a IA a estruturar questões de alta complexidade conceitual, com múltiplas etapas matemáticas acopladas ou deduções abstratas profundas.
-   - **Estimativa de Custo em Dólar**:
-     - Implementada a lógica de precificação oficial do modelo `google/gemini-2.5-flash`:
-       * Custo de Entrada (Prompt): **$0.075 / 1M tokens** (`0.000000075 USD / token`)
-       * Custo de Saída (Completion): **$0.30 / 1M tokens** (`0.00000030 USD / token`)
-     - O custo total da geração é calculado como: `(promptTokens * 0.000000075) + (completionTokens * 0.00000030)`.
-     - O custo é exibido no elemento `#contadorCusto` formatado em dólares com até 5 casas decimais (ex: `Custo estimado: $ 0.00015`).
+3. **[app.js](file:///g:/Meu%20Drive/#-Estudos%20Dev/prova-fisica-2/app.js)** (Engenharia de Prompt e Renderização Dinâmica):
+   - **Atualização do Prompt de Sistema**: Instruímos explicitamente a IA a produzir todas as suas fórmulas, equações e unidades em formato LaTeX usando as sintaxes de delimitadores especificadas.
+   - **Renderização Dinâmica**: Como a página injeta questões de forma assíncrona após chamadas de API, adicionamos a chamada do MathJax logo após anexar a nova questão no DOM:
+     ```javascript
+     if (window.MathJax && window.MathJax.typesetPromise) {
+         window.MathJax.typesetPromise();
+     }
+     ```
+     Isso força a biblioteca a escanear a nova questão e renderizar instantaneamente suas fórmulas matemáticas sem exigir a reinicialização da página completa.
+   - **Compatibilidade Retroativa**: Atualizamos a função utilitária `formatarTextoFisica()` para bypassar as expressões de sobrescrito (`^`) e subscrito (`_`) de texto puro quando a string contiver caracteres de LaTeX, impedindo colisões de caracteres e garantindo a integridade dos operadores do MathJax.
 
 ---
 
-## 🧪 Validação Visual e de Regras
+## 🧪 Validação dos Testes
 
-- [x] **Visual Uniforme**: As duas caixas de texto (`instrucoesAdicionais` e `caixaContexto`) dividem a largura total do painel de forma organizada quando ativadas, com o mesmo comportamento de margens, padding e bordas.
-- [x] **Calibração no OpenRouter**: Ao gerar uma questão com dificuldade **Fácil**, a IA produz um item de aplicação direta da Lei de Coulomb ou calorimetria. Ao escolher **Difícil**, o enunciado constrói situações de múltiplas forças combinadas ou trocas de calor em sistemas dissipativos complexos.
-- [x] **Cálculo Financeiro Exato**: O custo em dólar é computado sem erros de `NaN` ou divisões incorretas, mostrando a estimativa precisa e incentivando a consciência de custos do professor.
-- [x] **Consistência do Git**: O histórico de commits está limpo, organizado e documenta perfeitamente o progresso do desenvolvimento das melhorias.
+- [x] **Renderização Científica**: Fórmulas complexas (como equações cinemáticas, potências de dez, notações científicas e frações) são renderizadas com alta fidelidade matemática no container da folha de prova.
+- [x] **Injeção Assíncrona**: O MathJax aplica a formatação instantaneamente após o carregamento de cada nova questão com IA, mantendo o processo fluido para o professor.
+- [x] **Layout Limpo de Impressão**: Os blocos de fórmulas e gabaritos respondem perfeitamente aos estilos de visualização e são enviados ao diálogo de impressão com nitidez absoluta.

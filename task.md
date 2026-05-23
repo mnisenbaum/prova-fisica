@@ -11,3 +11,8 @@
 - [x] **[Melhoria]** Efetuar commits antes e depois das modificações no Git para controle de versionamento.
 - [x] **[Melhoria]** Implementar o cálculo financeiro em dólares ($) baseado nos custos oficiais do modelo `google/gemini-2.5-flash` ($0.075 por 1M tokens de entrada e $0.30 por 1M tokens de saída).
 - [x] **[Melhoria]** Exibir a estimativa de custos formatada em dólares com 5 casas decimais na tela.
+- [x] **[Melhoria]** Conectar e sincronizar o repositório local com o GitHub remoto (`https://github.com/mnisenbaum/prova-fisica`).
+- [x] **[Melhoria]** Copiar arquivos de documentação para a raiz do repositório e criar um arquivo `README.md` detalhado.
+- [x] **[Melhoria]** Adicionar suporte completo a equações e fórmulas científicas em LaTeX via CDN do MathJax v3.
+- [x] **[Melhoria]** Calibrar o prompt de sistema da IA para obrigar o uso de `\\( ... \\)` para fórmulas inline e `$$ ... $$` para equações em bloco.
+- [x] **[Melhoria]** Forçar re-renderização assíncrona do MathJax via `window.MathJax.typesetPromise()` após a injeção dinâmica de novas questões.
