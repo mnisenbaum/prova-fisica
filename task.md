@@ -19,3 +19,4 @@
 - [x] **[Correção]** Corrigir a renderização do LaTeX substituindo delimitadores inline pelo estável cifrão simples (`$`), evitando conflitos de escape de barras invertidas com o OpenRouter.
 - [x] **[Melhoria]** Adicionar uma rotina de segurança Regex antes do `JSON.parse` para restaurar e validar possíveis escapes de barras invertidas em delimitadores especiais `(`, `)` e `$`.
 - [x] **[Melhoria]** Ajustar `formatarTextoFisica` para ignorar filtros legados se a fórmula contiver delimitadores de cifrão simples (`$`).
+- [x] **[Correção]** Resolver o carregamento do MathJax definindo `window.MathJax` antes da importação do script CDN, removendo o polyfill.io bloqueado por adblockers/segurança de navegadores, e importando o bundle completo de fórmulas `tex-mml-chtml.js`.
